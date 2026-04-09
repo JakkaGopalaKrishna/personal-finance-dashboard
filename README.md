@@ -29,7 +29,7 @@ Once zoomed in, you can move across the chart.
 
 ### 🖱️ Desktop
 
-* Click and **drag left/right** on the chart
+* Double Click and **drag left/right** on the chart
 
 ### 📱 Mobile
 
@@ -81,3 +81,4 @@ This will:
 ---
 
 Enjoy exploring your financial data interactively! 📈
+[Live Link](https://jakkagopalakrishna.github.io/personal-finance-dashboard/)
