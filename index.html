@@ -1,484 +1,571 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>JGK MoneyHaven PRO | Balance Tracker</title>
     <link rel="icon" href="JGK_MoneyHaven_Logo.png" type="image/png">
-    
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <script src="https://cdn.jsdelivr.net/npm/hammerjs"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 
-<style>
-/* (ALL YOUR ORIGINAL CSS — UNCHANGED) */
-</style>
-</head>
-
-<body>
-<!-- (ALL YOUR ORIGINAL HTML — UNCHANGED) -->
-
-<script>
-/* (ALL YOUR ORIGINAL CODE — UNCHANGED UNTIL CHART PART) */
-
-function drawBalanceChart(timeline) {
-    const ctx = document.getElementById('balanceChart').getContext('2d');
-    const labels = timeline.map(t => t.date);
-    const initialMin = labels.length > 7 ? labels[labels.length - 7] : labels[0];
-
-    charts.balance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Balance',
-                data: timeline.map(t => t.balance),
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                fill: true,
-                tension: 0.3,
-                pointRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                zoom: {
-                    pan: {
-                        enabled: true,
-                        mode: 'x',
-                        threshold: 5
-                    },
-                    zoom: {
-                        wheel: {
-                            enabled: true,
-                            speed: 0.03
-                        },
-                        pinch: {
-                            enabled: true
-                        },
-                        mode: 'x',
-                        limits: {
-                            x: {
-                                minRange: 4
-                            }
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: { min: initialMin },
-                y: { ticks: { callback: v => '₹' + formatCurrency(v) } }
-            }
-        }
-    });
-}
-
-function drawCategoryChart(catData) {
-    const labels = Object.keys(catData);
-
-    charts.category = new Chart(document.getElementById('categoryChart'), {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: Object.values(catData),
-                backgroundColor: '#6366f1',
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                zoom: {
-                    pan: {
-                        enabled: true,
-                        mode: 'x',
-                        threshold: 5
-                    },
-                    zoom: {
-                        wheel: {
-                            enabled: true,
-                            speed: 0.03
-                        },
-                        pinch: {
-                            enabled: true
-                        },
-                        mode: 'x',
-                        limits: {
-                            x: {
-                                minRange: 4
-                            }
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    min: labels.length > 5 ? labels[0] : undefined,
-                    max: labels.length > 5 ? labels[4] : undefined
-                }
-            }
-        }
-    });
-}
-
-/* (REST OF YOUR CODE UNCHANGED) */
-</script>
-
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JGK MoneyHaven PRO | Balance Tracker</title>
-    <link rel="icon" href="JGK_MoneyHaven_Logo.png" type="image/png">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
-    /* PRESERVED ORIGINAL STYLES */
-    .pro-pulse {
-        color: gold;
-        font-weight: 700;
-        animation: glowPulse 1.8s infinite alternate;
-    }
+        :root {
+            --bg-body: #0b0f19;
+            --bg-card: #111827;
+            --primary: #6366f1;
+            --success: #10b981;
+            --danger: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #1f2937;
+        }
 
-    @keyframes glowPulse {
-      from { text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700; }
-      to { text-shadow: 0 0 10px #ffd700, 0 0 25px #ffb700, 0 0 40px rgba(255, 215, 0, 1); }
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
 
-    .brand-glow {
-      color: #6366f1;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      animation: brandGlowPulse 2s infinite alternate;
-    }
+        body {
+            background: var(--bg-body);
+            color: var(--text-main);
+            padding: 16px;
+            overflow-x: hidden;
+        }
 
-    @keyframes brandGlowPulse {
-      from { text-shadow: 0 0 4px #6366f1, 0 0 8px rgba(99, 102, 241, 0.6); }
-      to { text-shadow: 0 0 10px #6366f1, 0 0 20px rgba(99, 102, 241, 0.9), 0 0 35px rgba(99, 102, 241, 1); }
-    }
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-body);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
 
-    :root {
-      --bg-body: #0b0f19;
-      --bg-card: #111827;
-      --primary: #6366f1;
-      --success: #10b981;
-      --danger: #f43f5e;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #1f2937;
-    }
+        .container {
+            max-width: 1400px;
+            margin: auto;
+        }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: var(--bg-body); color: var(--text-main); padding: 16px; overflow-x: hidden; }
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
-    .loading-overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--bg-body);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease;
-    }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
 
-    .container { max-width: 1400px; margin: auto; }
-    header { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .brand { display: flex; align-items: center; gap: 8px; font-size: 1.25rem; font-weight: 800; }
-    
-    .btn { padding: 10px 16px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 6px; text-decoration: none; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-secondary { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); }
+        .btn {
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
 
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 20px; }
-    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
-    .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
-    .stat-value { font-size: 1.2rem; font-weight: 700; margin-top: 4px; }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
 
-    .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; }
-    .card-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-muted); }
-    
-    canvas { width: 100% !important; height: 300px !important; }
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
 
-    .transaction-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .transaction-table th, .transaction-table td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
-    .transaction-table th { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
-    .amount-inc { color: var(--success); font-weight: 700; }
-    .amount-exp { color: var(--danger); font-weight: 700; }
-    .badge { font-size: 10px; padding: 4px 6px; border-radius: 6px; background: var(--border); }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
 
-    .app-icon { display: block; margin: 20px auto 0; width: 180px; max-width: 80%; opacity: 0.9; }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+        }
 
-    @media (min-width: 768px) {
-      .dashboard-grid { grid-template-columns: repeat(12, 1fr); }
-      .col-12 { grid-column: span 12; }
-      .col-8 { grid-column: span 8; }
-      .col-4 { grid-column: span 4; }
-      .stat-value { font-size: 1.5rem; }
-    }
-    
-    @media (max-width: 768px) {
-      header { flex-direction: column; align-items: flex-start; }
-      .stats-grid { grid-template-columns: 1fr; }
-    }
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .transaction-table th,
+        .transaction-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        .transaction-table th {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .amount-inc {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .amount-exp {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            background: var(--border);
+        }
+
+        .app-icon {
+            display: block;
+            margin: 20px auto 0;
+            width: 180px;
+            max-width: 80%;
+            opacity: 0.9;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(12, 1fr);
+            }
+
+            .col-12 {
+                grid-column: span 12;
+            }
+
+            .col-8 {
+                grid-column: span 8;
+            }
+
+            .col-4 {
+                grid-column: span 4;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* PRESERVED ORIGINAL STYLES */
+        .pro-pulse {
+            color: gold;
+            font-weight: 700;
+            animation: glowPulse 1.8s infinite alternate;
+        }
+
+        @keyframes glowPulse {
+            from {
+                text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700;
+            }
+
+            to {
+                text-shadow: 0 0 10px #ffd700, 0 0 25px #ffb700, 0 0 40px rgba(255, 215, 0, 1);
+            }
+        }
+
+        .brand-glow {
+            color: var(--primary);
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            animation: brandGlowPulse 2s infinite alternate;
+        }
+
+        @keyframes brandGlowPulse {
+            from {
+                text-shadow: 0 0 4px var(--primary), 0 0 8px rgba(99, 102, 241, 0.6);
+            }
+
+            to {
+                text-shadow: 0 0 10px var(--primary), 0 0 20px rgba(99, 102, 241, 0.9), 0 0 35px rgba(99, 102, 241, 1);
+            }
+        }
     </style>
 </head>
+
 <body>
 
-<div id="loader" class="loading-overlay">
-    <div style="text-align: center;">
-        <h2 style="color: var(--primary); font-size: 3rem; letter-spacing: 5px; margin-bottom: 10px;">JGK</h2>
-        <p style="color: var(--text-muted); font-weight: 500;">Syncing Financial Data...</p>
-    </div>
-</div>
-
-<div class="container">
-    <header>
-        <div class="brand">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#6366f1"/><path d="M10 22V10M16 22V15M22 22V18" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
-            <span class="brand-glow">JGK MoneyHaven</span>
-            <span class="pro-pulse">PRO👑</span>
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-secondary" onclick="resetCharts()">Reset View</button>
-            <a href="https://forms.gle/EvDds21oo8sDwy797" target="_blank" class="btn btn-primary">+ Add Transaction</a>
-        </div>
-    </header>
-
-    <div class="stats-grid">
-        <div class="stat-card" style="border-color: var(--success)">
-            <div class="stat-label">Total Income</div>
-            <div class="stat-value" id="incomeCount">₹0.00</div>
-        </div>
-        <div class="stat-card" style="border-color: var(--danger)">
-            <div class="stat-label">Total Expenses</div>
-            <div class="stat-value" id="expenseCount">₹0.00</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Current Balance</div>
-            <div class="stat-value" id="savingsCount">₹0.00</div>
+    <div id="loader" class="loading-overlay">
+        <div style="text-align: center;">
+            <h2 style="color: var(--primary); font-size: 3rem; letter-spacing: 5px; margin-bottom: 10px;">JGK</h2>
+            <p style="color: var(--text-muted); font-weight: 500;">Syncing Financial Data...</p>
         </div>
     </div>
 
-    <div class="dashboard-grid">
-        <div class="card col-12">
-            <div class="card-title">💰 Balance Growth (Scroll to navigate, Pinch to zoom)</div>
-            <canvas id="balanceChart"></canvas>
+    <div class="container">
+        <header>
+            <div class="brand">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="8" fill="#6366f1" />
+                    <path d="M10 22V10M16 22V15M22 22V18" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+                </svg>
+                <span class="brand-glow">JGK MoneyHaven</span>
+                <span class="pro-pulse">PRO👑</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" onclick="resetCharts()">Reset View</button>
+                <a href="https://forms.gle/EvDds21oo8sDwy797" target="_blank" class="btn btn-primary">+ Add
+                    Transaction</a>
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card" style="border-color: var(--success)">
+                <div class="stat-label">Total Income</div>
+                <div class="stat-value" id="incomeCount">₹0.00</div>
+            </div>
+            <div class="stat-card" style="border-color: var(--danger)">
+                <div class="stat-label">Total Expenses</div>
+                <div class="stat-value" id="expenseCount">₹0.00</div>
+            </div>
+            <div class="stat-card" style="border-color: var(--primary)">
+                <div class="stat-label">Current Balance</div>
+                <div class="stat-value" id="savingsCount">₹0.00</div>
+            </div>
         </div>
 
-        <div class="card col-8">
-            <div class="card-title">📉 Expense Breakdown by Category</div>
-            <canvas id="categoryChart"></canvas>
-        </div>
+        <div class="dashboard-grid">
+            <div class="card col-12">
+                <div class="card-title">💰 Balance Growth (Scroll to navigate, Pinch to zoom)</div>
+                <canvas id="balanceChart"></canvas>
+            </div>
 
-        <div class="card col-4">
-            <div class="card-title">⚖️ Income vs Expense</div>
-            <canvas id="pieChart"></canvas>
-        </div>
+            <div class="card col-12">
+                <div class="card-title">📊 Income vs Expense by Category</div>
+                <canvas id="incomeExpenseBarChart"></canvas>
+            </div>
 
-        <div class="card col-12">
-            <div class="card-title">🕒 Recent Transactions</div>
-            <div style="overflow-x: auto;">
-                <table class="transaction-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Category</th>
-                            <th>Type</th>
-                            <th>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionList"></tbody>
-                </table>
+            <div class="card col-12">
+                <div class="card-title">📊 Monthly Income vs Expense + Balance</div>
+                <canvas id="monthlyBarChart"></canvas>
+            </div>
+
+            <div class="card col-8">
+                <div class="card-title">📉 Expense Breakdown by Category</div>
+                <canvas id="categoryChart"></canvas>
+            </div>
+
+            <div class="card col-4">
+                <div class="card-title">⚖️ Income vs Expense</div>
+                <canvas id="pieChart"></canvas>
+            </div>
+
+            <div class="card col-12">
+                <div class="card-title">🕒 Recent Transactions</div>
+                <div style="overflow-x: auto;">
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionList"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<img src="JGK_MoneyHaven_Logo.png" alt="JGK MoneyHaven Logo" class="app-icon">
-<a href="https://docs.google.com/spreadsheets/d/1nAqs_jnqmHzLajhToxoTRL1qfREOoAC5QdQEoXFLq8c?resourcekey=&usp=forms_web_b&urp=linked#gid=1311355495">_data</a>
+    <img src="JGK_MoneyHaven_Logo.png" alt="JGK MoneyHaven Logo" class="app-icon">
+    <a target="_blank"
+        href="https://docs.google.com/spreadsheets/d/1nAqs_jnqmHzLajhToxoTRL1qfREOoAC5QdQEoXFLq8c?resourcekey=&usp=forms_web_b&urp=linked#gid=1311355495">
+        _data
+    </a>
 
 
-<script>
-const SHEET_ID = "1nAqs_jnqmHzLajhToxoTRL1qfREOoAC5QdQEoXFLq8c";
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+    <script>
+        const SHEET_ID = "1nAqs_jnqmHzLajhToxoTRL1qfREOoAC5QdQEoXFLq8c";
+        const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+        const theme = {
+            bgBody: "#0b0f19",
+            bgCard: "#111827",
+            primary: "#6366f1",
+            // success: "#10b981",
+            // danger: "#f43f5e",
+            success: "#05b514",
+            danger: "#ff0000",
+            textMain: "#f8fafc",
+            textMuted: "#94a3b8",
+            border: "#1f2937"
+        };
+        let charts = {}; // Store chart instances
 
-let charts = {}; // Store chart instances
+        const formatCurrency = (num) => num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-const formatCurrency = (num) => num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formatDate = (date) => {
+            if (!(date instanceof Date) || isNaN(date)) return "N/A";
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            return `${day}-${month}-${date.getFullYear()}`;
+        };
 
-const formatDate = (date) => {
-    if (!(date instanceof Date) || isNaN(date)) return "N/A";
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    return `${day}-${month}-${date.getFullYear()}`;
-};
+        fetch(SHEET_URL)
+            .then(res => res.text())
+            .then(data => {
+                const json = JSON.parse(data.substring(47).slice(0, -2));
+                const rawRows = json.table.rows;
 
-fetch(SHEET_URL)
-    .then(res => res.text())
-    .then(data => {
-        const json = JSON.parse(data.substring(47).slice(0, -2));
-        const rawRows = json.table.rows;
-        
-        const cleanData = rawRows.map(r => ({
-            date: (() => {
-                const v = r.c[1]?.v;
-                if (typeof v === "string" && v.startsWith("Date(")) {
-                    const [y, m, d] = v.match(/\d+/g).map(Number);
-                    return new Date(y, m, d);
+                const cleanData = rawRows.map(r => ({
+                    date: (() => {
+                        const v = r.c[1]?.v;
+                        if (typeof v === "string" && v.startsWith("Date(")) {
+                            const [y, m, d] = v.match(/\d+/g).map(Number);
+                            return new Date(y, m, d);
+                        }
+                        return v instanceof Date ? v : new Date(v);
+                    })(),
+                    type: (r.c[2]?.v || "").trim(),
+                    amount: Number(r.c[3]?.v || 0),
+                    category: (r.c[4]?.v || "Other").trim()
+                })).sort((a, b) => a.date - b.date);
+
+                renderDashboard(cleanData);
+                document.getElementById('loader').style.opacity = '0';
+                setTimeout(() => document.getElementById('loader').style.visibility = 'hidden', 500);
+            });
+
+        function renderDashboard(data) {
+            let runningBalance = 0;
+            let totalInc = 0;
+            let totalExp = 0;
+            const catTotals = {};
+            const balanceTimeline = [];
+
+            data.forEach(item => {
+                const change = item.type === "Income" ? item.amount : -item.amount;
+                runningBalance += change;
+                if (item.type === "Income") totalInc += item.amount;
+                else {
+                    totalExp += item.amount;
+                    catTotals[item.category] = (catTotals[item.category] || 0) + item.amount;
                 }
-                return v instanceof Date ? v : new Date(v);
-            })(),
-            type: (r.c[2]?.v || "").trim(),
-            amount: Number(r.c[3]?.v || 0),
-            category: (r.c[4]?.v || "Other").trim()
-        })).sort((a,b) => a.date - b.date);
+                balanceTimeline.push({ date: formatDate(item.date), balance: runningBalance, change: change, label: item.category });
+            });
 
-        renderDashboard(cleanData);
-        document.getElementById('loader').style.opacity = '0';
-        setTimeout(() => document.getElementById('loader').style.visibility = 'hidden', 500);
-    });
-
-function renderDashboard(data) {
-    let runningBalance = 0;
-    let totalInc = 0;
-    let totalExp = 0;
-    const catTotals = {};
-    const balanceTimeline = [];
-
-    data.forEach(item => {
-        const change = item.type === "Income" ? item.amount : -item.amount;
-        runningBalance += change;
-        if(item.type === "Income") totalInc += item.amount;
-        else {
-            totalExp += item.amount;
-            catTotals[item.category] = (catTotals[item.category] || 0) + item.amount;
+            updateCounters(totalInc, totalExp, runningBalance);
+            drawBalanceChart(balanceTimeline);
+            drawCategoryChart(catTotals);
+            drawPieChart(totalInc, totalExp);
+            updateRecentTransactions(data);
+            drawIncomeExpenseBarChart(data);
+            drawMonthlyBarChart(data);
         }
-        balanceTimeline.push({ date: formatDate(item.date), balance: runningBalance, change: change, label: item.category });
-    });
 
-    updateCounters(totalInc, totalExp, runningBalance);
-    drawBalanceChart(balanceTimeline);
-    drawCategoryChart(catTotals);
-    drawPieChart(totalInc, totalExp);
-    updateRecentTransactions(data);
-}
-
-function updateCounters(inc, exp, balance) {
-    animateValue("incomeCount", 0, inc, 1000);
-    animateValue("expenseCount", 0, exp, 1000);
-    animateValue("savingsCount", 0, balance, 1000);
-}
-
-function animateValue(id, start, end, duration) {
-    const obj = document.getElementById(id);
-    let startTimestamp = null;
-    const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        obj.innerHTML = `₹${formatCurrency(progress * (end - start) + start)}`;
-        if (progress < 1) window.requestAnimationFrame(step);
-    };
-    window.requestAnimationFrame(step);
-}
-
-function drawBalanceChart(timeline) {
-    const ctx = document.getElementById('balanceChart').getContext('2d');
-    const labels = timeline.map(t => t.date);
-    
-    // Zoom logic: Show last 7 days initially
-    const initialMin = labels.length > 7 ? labels[labels.length - 7] : labels[0];
-
-    charts.balance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Balance',
-                data: timeline.map(t => t.balance),
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                fill: true,
-                tension: 0.3,
-                pointRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                zoom: {
-                    pan: { enabled: true, mode: 'x' },
-                    zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
-                }
-            },
-            scales: {
-                x: { min: initialMin },
-                y: { ticks: { callback: v => '₹' + formatCurrency(v) } }
-            }
+        function updateCounters(inc, exp, balance) {
+            animateValue("incomeCount", 0, inc, 1000);
+            animateValue("expenseCount", 0, exp, 1000);
+            animateValue("savingsCount", 0, balance, 1000);
         }
-    });
-}
 
-function drawCategoryChart(catData) {
-    const labels = Object.keys(catData);
-    charts.category = new Chart(document.getElementById('categoryChart'), {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{ data: Object.values(catData), backgroundColor: '#6366f1', borderRadius: 8 }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                zoom: {
-                    pan: { enabled: true, mode: 'x' },
-                    zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
-                }
-            },
-            scales: {
-                x: { 
-                    // Limit visible bars to 5 if many exist
-                    min: labels.length > 5 ? labels[0] : undefined,
-                    max: labels.length > 5 ? labels[4] : undefined
-                }
-            }
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = `₹${formatCurrency(progress * (end - start) + start)}`;
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
         }
-    });
-}
 
-function drawPieChart(inc, exp) {
-    new Chart(document.getElementById('pieChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Income', 'Expense'],
-            datasets: [{ data: [inc, exp], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }]
-        },
-        options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
-    });
-}
+        function drawBalanceChart(timeline) {
+            const ctx = document.getElementById('balanceChart').getContext('2d');
+            const labels = timeline.map(t => t.date);
 
-function updateRecentTransactions(data) {
-    const list = document.getElementById('transactionList');
-    const recent = [...data].reverse().slice(0, 10);
-    list.innerHTML = recent.map(item => `
+            charts.balance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Balance',
+                        data: timeline.map(t => t.balance),
+                        borderColor: theme.primary,
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        zoom: {
+                            pan: { enabled: true, mode: 'x', threshold: 5 },
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                    speed: 0.03
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'x',
+                                limits: {
+                                    x: {
+                                        minRange: 4
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            // Limit visible bars to 5 if many exist
+                            min: labels.length > 10 ? labels.length - 10 : 0,
+                            max: labels.length > 10 ? labels.length - 1 : labels.length - 1
+                        },
+                        y: { ticks: { callback: v => '₹' + formatCurrency(v) } }
+                    }
+                }
+            });
+        }
+
+        function drawCategoryChart(catData) {
+            const labels = Object.keys(catData);
+            charts.category = new Chart(document.getElementById('categoryChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{ data: Object.values(catData), backgroundColor: theme.primary, borderRadius: 8 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        zoom: {
+                            pan: { enabled: true, mode: 'x', threshold: 5 },
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                    speed: 0.03
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'x',
+                                limits: {
+                                    x: {
+                                        minRange: 4
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            // Limit visible bars to 5 if many exist
+                            min: labels.length > 5 ? labels[0] : undefined,
+                            max: labels.length > 5 ? labels[4] : undefined
+                        }
+                    }
+                }
+            });
+        }
+
+        function drawPieChart(inc, exp) {
+            new Chart(document.getElementById('pieChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Income', 'Expense'],
+                    datasets: [{ data: [inc, exp], backgroundColor: [theme.success, theme.danger], borderWidth: 0 }]
+                },
+                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function updateRecentTransactions(data) {
+            const list = document.getElementById('transactionList');
+            const recent = [...data].reverse().slice(0, 10);
+            list.innerHTML = recent.map(item => `
         <tr>
             <td>${formatDate(item.date)}</td>
             <td>${item.category}</td>
@@ -488,12 +575,219 @@ function updateRecentTransactions(data) {
             </td>
         </tr>
     `).join('');
-}
+        }
 
-function resetCharts() {
-    if(charts.balance) charts.balance.resetZoom();
-    if(charts.category) charts.category.resetZoom();
-}
-</script>
+        function resetCharts() {
+            if (charts.balance) charts.balance.resetZoom();
+            if (charts.bar) charts.bar.resetZoom();
+            if (charts.monthlyBar) charts.monthlyBar.resetZoom();
+            if (charts.category) charts.category.resetZoom();
+        }
+
+        function drawIncomeExpenseBarChart(data) {
+            // 🔹 Step 1: Group data
+            const categoryMap = {};
+
+            data.forEach(item => {
+                if (!categoryMap[item.category]) {
+                    categoryMap[item.category] = { income: 0, expense: 0 };
+                }
+
+                if (item.type === "Income") {
+                    categoryMap[item.category].income += item.amount;
+                } else {
+                    categoryMap[item.category].expense += item.amount;
+                }
+            });
+
+            // 🔹 Step 2: Prepare chart arrays
+            const categories = Object.keys(categoryMap);
+            const incomeData = categories.map(cat => categoryMap[cat].income);
+            const expenseData = categories.map(cat => categoryMap[cat].expense);
+
+            // 🔹 Step 3: Destroy old chart (important fix)
+            if (charts.bar) charts.bar.destroy();
+
+            // 🔹 Step 4: Create chart
+            charts.bar = new Chart(document.getElementById("incomeExpenseBarChart"), {
+                type: "bar",
+                data: {
+                    labels: categories,
+                    datasets: [
+                        {
+                            label: "Income",
+                            data: incomeData,
+                            backgroundColor: theme.success
+                        },
+                        {
+                            label: "Expense",
+                            data: expenseData,
+                            backgroundColor: theme.danger
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "top"
+                        },
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x',
+                                threshold: 5
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                    speed: 0.03
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'x',
+                                limits: {
+                                    x: {
+                                        minRange: 4
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: v => '₹' + formatCurrency(v)
+                            }
+                        },
+                        x: {
+                            // Limit visible bars to 5 if many exist
+                            min: categories.length > 5 ? categories[0] : undefined,
+                            max: categories.length > 5 ? categories[4] : undefined
+                        }
+                    }
+                }
+            });
+        }
+
+        function drawMonthlyBarChart(data) {
+            const monthMap = {};
+
+            data.forEach(item => {
+                const date = new Date(item.date);
+                const month = date.toLocaleString('default', { month: 'short', year: '2-digit' });
+
+                if (!monthMap[month]) {
+                    monthMap[month] = { income: 0, expense: 0 };
+                }
+
+                if (item.type === "Income") {
+                    monthMap[month].income += item.amount;
+                } else {
+                    monthMap[month].expense += item.amount;
+                }
+            });
+
+            const months = Object.keys(monthMap);
+
+            const incomeData = months.map(m => monthMap[m].income);
+            const expenseData = months.map(m => monthMap[m].expense);
+
+            let balance = 0;
+            const balanceData = months.map(m => {
+                balance += (monthMap[m].income - monthMap[m].expense);
+                return balance;
+            });
+
+            if (charts.monthlyBar) charts.monthlyBar.destroy();
+
+            charts.monthlyBar = new Chart(document.getElementById("monthlyBarChart"), {
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            type: "bar",
+                            label: "Income",
+                            data: incomeData,
+                            backgroundColor: theme.success
+                        },
+                        {
+                            type: "bar",
+                            label: "Expense",
+                            data: expenseData,
+                            backgroundColor: theme.danger
+                        },
+                        {
+                            type: "line",
+                            label: "Balance",
+                            data: balanceData,
+                            borderColor: theme.primary,
+                            backgroundColor: "#facc15",
+                            tension: 0.3,
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "top",
+                            display: false,
+                        },
+                        zoom: {
+                            pan: { enabled: true, mode: 'x', threshold: 5 },
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                    speed: 0.03
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'x',
+                                limits: {
+                                    x: {
+                                        minRange: 4
+                                    }
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    const month = ctx.label;
+                                    const inc = monthMap[month].income.toFixed(2);
+                                    const exp = monthMap[month].expense.toFixed(2);
+                                    const net = inc - exp;
+
+                                    return [`${ctx.dataset.label}: ₹${ctx.raw.toFixed(2)}`, `🟦 Net: ₹${net.toFixed(2)}`];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: v => '₹' + v
+                            }
+                        },
+                        x: {
+                            // Limit visible bars to 5 if many exist
+                            min: months.length > 5 ? months[months.length - 5] : undefined,
+                            max: months.length > 5 ? months[months.length] : undefined
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
 </body>
+
 </html>
