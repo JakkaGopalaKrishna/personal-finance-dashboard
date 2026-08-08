@@ -349,6 +349,11 @@
                     </table>
                 </div>
             </div>
+
+            <div class="card col-12">
+                <div class="card-title">📋 Category Summary</div>
+                <div id="categorySummaryContainer" style="overflow-x: auto;"></div>
+            </div>
         </div>
     </div>
     <img src="JGK_MoneyHaven_Logo.png" alt="JGK MoneyHaven Logo" class="app-icon">
@@ -404,6 +409,7 @@
                     category: (r.c[4]?.v || "Other").trim()
                 })).sort((a, b) => a.date - b.date);
 
+                console.log("cleanData :", cleanData);
                 renderDashboard(cleanData);
                 document.getElementById('loader').style.opacity = '0';
                 setTimeout(() => document.getElementById('loader').style.visibility = 'hidden', 500);
@@ -434,6 +440,8 @@
             updateRecentTransactions(data);
             drawIncomeExpenseBarChart(data);
             drawMonthlyBarChart(data);
+            const { tableHTML } = generateCategorySummaryTable(data);
+            document.getElementById('categorySummaryContainer').innerHTML = tableHTML;
         }
 
         function updateCounters(inc, exp, balance) {
@@ -785,6 +793,67 @@
                     }
                 }
             });
+        }
+
+        function generateCategorySummaryTable(data) {
+            // Step 1: Group data by category
+            const categoryMap = {};
+
+            data.forEach(item => {
+                if (!categoryMap[item.category]) {
+                    categoryMap[item.category] = { totalIncome: 0, totalExpense: 0 };
+                }
+
+                if (item.type === "Income") {
+                    categoryMap[item.category].totalIncome += item.amount;
+                } else {
+                    categoryMap[item.category].totalExpense += item.amount;
+                }
+            });
+
+            // Step 2: Convert to array and calculate total
+            const summaryArray = Object.entries(categoryMap).map(([category, values]) => ({
+                category: category,
+                totalExpense: values.totalExpense,
+                totalIncome: values.totalIncome,
+                total: values.totalIncome - values.totalExpense
+            }));
+
+            // Step 3: Sort by total in ascending order
+            summaryArray.sort((a, b) => a.total - b.total);
+
+            // Step 4: Generate HTML table
+            let tableHTML = `
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 20px;">
+                <thead>
+                    <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border);">
+                        <th style="padding: 12px; text-align: left; color: var(--text-muted); font-weight: 700;">Category</th>
+                        <th style="padding: 12px; text-align: left; color: var(--text-muted); font-weight: 700;">Total Expense</th>
+                        <th style="padding: 12px; text-align: left; color: var(--text-muted); font-weight: 700;">Total Income</th>
+                        <th style="padding: 12px; text-align: left; color: var(--text-muted); font-weight: 700;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+
+            summaryArray.forEach(row => {
+                const totalColor = row.total >= 0 ? 'color: var(--success);' : 'color: var(--danger);';
+                tableHTML += `
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 12px">${row.category}</td>
+                        <td style="padding: 12px; color: var(--danger);">₹${formatCurrency(row.totalExpense)}</td>
+                        <td style="padding: 12px; color: var(--success);">₹${formatCurrency(row.totalIncome)}</td>
+                        <td style="padding: 12px; font-weight: 700; ${totalColor}">${formatCurrency(row.total)}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                </tbody>
+            </table>
+            `;
+
+            return { tableHTML, data: summaryArray };
         }
 
     </script>
