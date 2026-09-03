@@ -394,8 +394,14 @@
             .then(data => {
                 const json = JSON.parse(data.substring(47).slice(0, -2));
                 const rawRows = json.table.rows;
-
-                const cleanData = rawRows.map(r => ({
+                
+                // Include transaction only when IncludeInBalance is TRUE
+                const IncludeInBalance = rawRows.filter(r => {
+                    return r.c[7]?.v === true ||
+                        String(r.c[7]?.v).toUpperCase() === "TRUE";
+                })
+                
+                const cleanData = IncludeInBalance.map(r => ({
                     date: (() => {
                         const v = r.c[1]?.v;
                         if (typeof v === "string" && v.startsWith("Date(")) {
