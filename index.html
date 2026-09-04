@@ -197,6 +197,29 @@
             opacity: 0.9;
         }
 
+        @media (max-width: 500px) {
+            .card.col-12 {
+                width: calc(100vw - 32px);
+                min-width: calc(100vw - 32px);
+                max-width: calc(100vw - 32px);
+                box-sizing: border-box;
+            }
+
+            #categorySummaryContainer {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+
+            #categorySummaryContainer table,
+            #transactionList {
+                width: max-content !important;
+                min-width: 600px;
+                white-space: nowrap;
+            }
+        }
+
         @media (min-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: repeat(12, 1fr);
@@ -394,13 +417,14 @@
             .then(data => {
                 const json = JSON.parse(data.substring(47).slice(0, -2));
                 const rawRows = json.table.rows;
-                
+                console.log("rawRows :", rawRows);
+
                 // Include transaction only when IncludeInBalance is TRUE
                 const IncludeInBalance = rawRows.filter(r => {
                     return r.c[7]?.v === true ||
                         String(r.c[7]?.v).toUpperCase() === "TRUE";
                 })
-                
+                console.log("IncludeInBalance :", IncludeInBalance);
                 const cleanData = IncludeInBalance.map(r => ({
                     date: (() => {
                         const v = r.c[1]?.v;
