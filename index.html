@@ -148,15 +148,210 @@
             color: var(--text-muted);
         }
 
-        canvas {
-            width: 100% !important;
-            height: 300px !important;
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card-header-row .card-title {
+            margin-bottom: 0;
+        }
+
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.72);
+            margin-bottom: 12px;
+        }
+
+        .filter-field {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(17, 24, 39, 0.92);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            min-height: 36px;
+        }
+
+        .filter-field input,
+        .filter-field select,
+        .filter-field button {
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            outline: none;
+            font: inherit;
+        }
+
+        .filter-field input,
+        .filter-field select {
+            min-height: 34px;
+            width: 100%;
+            padding: 0;
+            color: var(--text-main);
+        }
+
+        .filter-field input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .filter-field label {
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .filter-field.search {
+            flex: 1 1 220px;
+            min-width: 200px;
+        }
+
+        .filter-field.category,
+        .filter-field.type {
+            flex: 1 1 140px;
+        }
+
+        .filter-field.category select,
+        .filter-field.type select {
+            background: #000 !important;
+            color: #fff !important;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            padding: 0 10px;
+            min-height: 36px;
+        }
+
+        .filter-field.category select option,
+        .filter-field.type select option {
+            background: #000;
+            color: #fff;
+        }
+
+        .date-range-field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1 1 260px;
+            min-width: 220px;
+            min-height: 40px;
+            background: rgba(17, 24, 39, 0.92);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0 12px;
+        }
+
+        .date-range-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .date-range-pair {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .date-range-pair input {
+            flex: 1 1 0;
+            min-width: 0;
+            width: 100%;
+            max-width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font: inherit;
+            font-size: 13px;
+            outline: none;
+            padding: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .date-range-pair input[type="date"] {
+            background: transparent;
+            color: var(--text-main);
+            border: none;
+            appearance: none;
+            -webkit-appearance: none;
+            box-sizing: border-box;
+        }
+
+        .date-range-pair input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        .date-range-separator {
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .filter-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+            padding: 0 14px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .filter-action.primary {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.35);
+            color: #dfe3ff;
+        }
+
+        .filter-action.secondary {
+            background: transparent;
+            border-color: rgba(239, 68, 68, 0.35);
+            color: #fda4af;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .table-wrapper::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
         }
 
         .transaction-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
+            min-width: 520px;
         }
 
         .transaction-table th,
@@ -170,6 +365,86 @@
             font-size: 11px;
             color: var(--text-muted);
             text-transform: uppercase;
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .table-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .rows-per-page {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .rows-per-page select {
+            min-width: 70px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(17, 24, 39, 0.92);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .pagination-rail {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .page-nav-btn {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            background: rgba(255, 255, 255, 0.02);
+            color: #fff;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .page-nav-btn:hover:not(:disabled) {
+            border-color: rgba(99, 102, 241, 0.6);
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        .page-nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-indicator {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .transaction-count {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
         }
 
         .amount-inc {
@@ -236,54 +511,73 @@
             .col-4 {
                 grid-column: span 4;
             }
-
-            .stat-value {
-                font-size: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .filter-bar {
+                padding: 8px;
             }
+
+            .filter-field.search,
+            .filter-field.category,
+            .filter-field.type,
+            .date-range-field {
+                flex: 1 1 100%;
+                width: 100%;
+            }
+
+            .date-range-field {
+                min-height: 46px;
+                padding: 8px 10px;
+                background: #000;
+                border: 1px solid rgba(148, 163, 184, 0.2);
+                overflow: hidden;
+            }
+
+            .date-range-pair {
+                gap: 6px;
+                min-width: 0;
+            }
+
+            .date-range-pair input {
+                font-size: 12px;
+                color: #fff;
+                min-width: 0;
+                width: 100%;
+            }
+
+            .date-range-pair input[type="date"]::-webkit-calendar-picker-indicator {
+                filter: invert(1) brightness(1.5);
+            }
+
+            .date-range-separator {
+                color: #dfe7f7;
+            }
+
+            .table-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .pagination-rail {
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .transaction-table th, .transaction-table td { padding:8px 6px; }
         }
 
-        @media (max-width: 768px) {
-            header {
+        @media (max-width: 420px) {
+            .card-header-row {
                 flex-direction: column;
                 align-items: flex-start;
             }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* PRESERVED ORIGINAL STYLES */
-        .pro-pulse {
-            color: gold;
-            font-weight: 700;
-            animation: glowPulse 1.8s infinite alternate;
-        }
-
-        @keyframes glowPulse {
-            from {
-                text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700;
+            .table-footer {
+                align-items: center;
             }
 
-            to {
-                text-shadow: 0 0 10px #ffd700, 0 0 25px #ffb700, 0 0 40px rgba(255, 215, 0, 1);
-            }
-        }
-
-        .brand-glow {
-            color: var(--primary);
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            animation: brandGlowPulse 2s infinite alternate;
-        }
-
-        @keyframes brandGlowPulse {
-            from {
-                text-shadow: 0 0 4px var(--primary), 0 0 8px rgba(99, 102, 241, 0.6);
-            }
-
-            to {
-                text-shadow: 0 0 10px var(--primary), 0 0 20px rgba(99, 102, 241, 0.9), 0 0 35px rgba(99, 102, 241, 1);
+            .pagination-rail {
+                width: 100%;
             }
         }
     </style>
@@ -357,8 +651,40 @@
             </div>
 
             <div class="card col-12">
-                <div class="card-title">🕒 Recent Transactions</div>
-                <div style="overflow-x: auto;">
+                <div class="card-header-row">
+                    <div class="card-title">🕒 Recent Transactions</div>
+                    <div id="transactionsInfoTop" class="transaction-count"></div>
+                </div>
+
+                <div class="filter-bar">
+                    <div class="filter-field category">
+                        <select id="categoryFilter" aria-label="Filter by category">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-field type">
+                        <select id="typeFilter" aria-label="Filter by type">
+                            <option value="">All Types</option>
+                            <option value="Income">Income</option>
+                            <option value="Expense">Expense</option>
+                        </select>
+                    </div>
+
+                    <div class="date-range-field" aria-label="Date range filter">
+                        <span class="date-range-icon">📅</span>
+                        <div class="date-range-pair">
+                            <input id="dateFrom" type="date" aria-label="From date" />
+                            <span class="date-range-separator">-</span>
+                            <input id="dateTo" type="date" aria-label="To date" />
+                        </div>
+                    </div>
+
+                    <button id="applyFiltersBtn" class="filter-action primary" type="button">Apply</button>
+                    <button id="clearFiltersBtn" class="filter-action secondary" type="button">Clear</button>
+                </div>
+
+                <div class="table-wrapper">
                     <table class="transaction-table">
                         <thead>
                             <tr>
@@ -370,6 +696,22 @@
                         </thead>
                         <tbody id="transactionList"></tbody>
                     </table>
+                </div>
+
+                <div id="paginationFooter" class="table-footer">
+                    <div class="rows-per-page">
+                        <label for="rowsPerPageSelect">Rows per page</label>
+                        <select id="rowsPerPageSelect">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    
+                    <div class="pagination-rail">
+                        <div id="pagination" class="pagination-rail"></div>
+                    </div>
                 </div>
             </div>
 
@@ -600,10 +942,76 @@
             });
         }
 
+        let originalTransactionData = [];
+        let allTransactionData = [];
+        let currentPage = 1;
+        let rowsPerPage = 10;
+
         function updateRecentTransactions(data) {
+            // store newest-first for pagination and keep original for filtering
+            originalTransactionData = [...data].reverse();
+            // populate category filter options
+            populateCategoryFilter(originalTransactionData);
+            // apply any active filters (or show all)
+            applyTransactionFilters();
+        }
+
+        function populateCategoryFilter(data) {
+            const sel = document.getElementById('categoryFilter');
+            if (!sel) return;
+            const cats = Array.from(new Set(data.map(d => d.category))).sort();
+            // clear existing (keep first 'All')
+            sel.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        function parseDateInput(value) {
+            if (!value) return null;
+            const [year, month, day] = value.split('-').map(Number);
+            if (!year || !month || !day) return null;
+            return new Date(year, month - 1, day);
+        }
+
+        function applyTransactionFilters() {
+            const category = document.getElementById('categoryFilter')?.value || '';
+            const type = document.getElementById('typeFilter')?.value || '';
+            const from = document.getElementById('dateFrom')?.value;
+            const to = document.getElementById('dateTo')?.value;
+
+            const fromDate = parseDateInput(from);
+            const toDate = parseDateInput(to);
+
+            allTransactionData = originalTransactionData.filter(item => {
+                if (category && item.category !== category) return false;
+                if (type && item.type !== type) return false;
+                if (fromDate && item.date < fromDate) return false;
+                if (toDate) {
+                    const endOfToDay = new Date(toDate);
+                    endOfToDay.setHours(23, 59, 59, 999);
+                    if (item.date > endOfToDay) return false;
+                }
+                return true;
+            });
+
+            currentPage = 1;
+            renderTransactionPage();
+        }
+
+        function clearTransactionFilters() {
+            const ids = ['categoryFilter','typeFilter','dateFrom','dateTo'];
+            ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+            applyTransactionFilters();
+        }
+
+        function renderTransactionPage() {
             const list = document.getElementById('transactionList');
-            const recent = [...data].reverse().slice(0, 10);
-            list.innerHTML = recent.map(item => `
+            const total = allTransactionData.length;
+            const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const pageItems = allTransactionData.slice(start, start + rowsPerPage);
+
+            list.innerHTML = pageItems.map(item => `
         <tr>
             <td>${formatDate(item.date)}</td>
             <td>${item.category}</td>
@@ -613,6 +1021,56 @@
             </td>
         </tr>
     `).join('');
+
+            renderPagination(total, totalPages);
+            updateTransactionsInfo(total, start + 1, start + pageItems.length);
+        }
+
+        function updateTransactionsInfo(total, from, to) {
+            const infoTop = document.getElementById('transactionsInfoTop');
+            const text = `Showing ${from}-${to} of ${total} row(s)`;
+
+            if (infoTop) infoTop.textContent = text;
+        }
+
+        function renderPagination(totalItems, totalPages) {
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+
+            const prev = document.createElement('button');
+            prev.type = 'button';
+            prev.className = 'page-nav-btn';
+            prev.innerHTML = '&#8592;';
+            prev.disabled = currentPage === 1;
+            prev.onclick = () => { if (currentPage > 1) { currentPage--; renderTransactionPage(); } };
+
+            const page = document.createElement('p');
+            page.className = 'page-indicator';
+            page.innerText="Page";
+
+            const pageText = document.createElement('div');
+            pageText.className = 'page-indicator';
+            pageText.textContent = `${currentPage}/${totalPages}`;
+
+            const next = document.createElement('button');
+            next.type = 'button';
+            next.className = 'page-nav-btn';
+            next.innerHTML = '&#8594;';
+            next.disabled = currentPage === totalPages;
+            next.onclick = () => { if (currentPage < totalPages) { currentPage++; renderTransactionPage(); } };
+
+            container.appendChild(prev);
+            container.appendChild(page);
+            container.appendChild(pageText);
+            container.appendChild(next);
+
+            const total = totalItems;
+            const start = (currentPage - 1) * rowsPerPage + 1;
+            const end = Math.min(totalItems, (currentPage) * rowsPerPage);
+            const infoText = `Showing ${start}–${end} of ${total} row(s)`;
+
+            const infoTop = document.getElementById('transactionsInfoTop');
+            if (infoTop) infoTop.textContent = infoText;
         }
 
         function resetCharts() {
@@ -886,6 +1344,31 @@
             return { tableHTML, data: summaryArray };
         }
 
+        // Rows-per-page selector handler and filter buttons wiring
+        const rowsPerPageSelect = document.getElementById('rowsPerPageSelect');
+        if (rowsPerPageSelect) {
+            rowsPerPageSelect.addEventListener('change', (e) => {
+                rowsPerPage = Number(e.target.value) || 10;
+                currentPage = 1;
+                renderTransactionPage();
+            });
+        }
+
+        // wire filter buttons
+        const applyBtn = document.getElementById('applyFiltersBtn');
+        if (applyBtn) applyBtn.addEventListener('click', applyTransactionFilters);
+        const clearBtn = document.getElementById('clearFiltersBtn');
+        if (clearBtn) clearBtn.addEventListener('click', clearTransactionFilters);
+
+        // also filter on change for selects and date fields
+        const categorySel = document.getElementById('categoryFilter');
+        if (categorySel) categorySel.addEventListener('change', applyTransactionFilters);
+        const typeSel = document.getElementById('typeFilter');
+        if (typeSel) typeSel.addEventListener('change', applyTransactionFilters);
+        const dateFrom = document.getElementById('dateFrom');
+        if (dateFrom) dateFrom.addEventListener('change', applyTransactionFilters);
+        const dateTo = document.getElementById('dateTo');
+        if (dateTo) dateTo.addEventListener('change', applyTransactionFilters);
     </script>
 </body>
 
