@@ -473,6 +473,41 @@
             height: 300px !important;
         }
 
+
+        /* Groww-style running balance chart */
+        .groww-card { padding: 18px 18px 14px; }
+        .groww-topline { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+        .groww-eyebrow { color:var(--text-muted); font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+        .groww-main-value { font-size:24px; font-weight:800; letter-spacing:-.04em; margin-top:5px; line-height:1.2; }
+        .groww-change { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-top:7px; font-size:13px; font-weight:700; }
+        .groww-change.positive { color:#22c55e; } .groww-change.negative { color:#fb7185; } .groww-change.neutral { color:var(--text-muted); }
+        .groww-chart-wrap { position:relative; height:300px; margin:14px 0 12px; }
+        .groww-range-controls { display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
+        .groww-range-btn { border:1px solid transparent; color:var(--text-muted); background:transparent; border-radius:9px; padding:7px 12px; font-size:12px; font-weight:800; cursor:pointer; transition:all .18s ease; }
+        .groww-range-btn:hover { color:var(--text-main); background:rgba(34,197,94,.08); }
+        .groww-range-btn.active { color:#07130d; background:#22c55e; }
+        .groww-meta {
+            display:grid;
+            grid-template-columns:repeat(3, minmax(0, 1fr));
+            gap:10px;
+            color:var(--text-muted);
+            font-size:12px;
+            line-height:1.5;
+            margin-top:12px;
+        }
+        .groww-meta span { display:block; min-width:0; overflow-wrap:anywhere; }
+        .groww-meta strong { color:var(--text-main); font-weight:700; }
+        .groww-chart-wrap canvas { height:100% !important; }
+        .groww-empty { display:none; height:100%; align-items:center; justify-content:center; text-align:center; color:var(--text-muted); font-size:13px; }
+        @media(max-width:600px) {
+            .groww-card { padding:14px 12px; }
+            .groww-chart-wrap { height:230px; margin:12px 0 18px; }
+            .groww-range-controls { width:100%; justify-content:space-between; gap:2px; }
+            .groww-range-btn { padding:7px 9px; }
+            .groww-meta { grid-template-columns:1fr; gap:7px; margin-top:8px; }
+            .groww-meta span { padding:8px 10px; background:rgba(148,163,184,.06); border:1px solid rgba(148,163,184,.10); border-radius:9px; }
+        }
+
         .amount-inc {
             color: var(--success);
             font-weight: 700;
@@ -651,6 +686,37 @@
         </div>
 
         <div class="dashboard-grid">
+
+            <div class="card col-12 groww-card">
+                <div class="groww-topline">
+                    <div>
+                        <div class="groww-eyebrow">Portfolio value</div>
+                        <div id="growwBalanceValue" class="groww-main-value">₹0.00</div>
+                        <div id="growwBalanceChange" class="groww-change neutral">
+                            <span>₹0.00 (0.00%)</span><span>in selected period</span>
+                        </div>
+                    </div>
+                    <div class="groww-range-controls" role="group" aria-label="Balance chart time range">
+                        <button type="button" class="groww-range-btn" data-groww-range="1D">1D</button>
+                        <button type="button" class="groww-range-btn" data-groww-range="1W">1W</button>
+                        <button type="button" class="groww-range-btn active" data-groww-range="1M">1M</button>
+                        <button type="button" class="groww-range-btn" data-groww-range="3M">3M</button>
+                        <button type="button" class="groww-range-btn" data-groww-range="6M">6M</button>
+                        <button type="button" class="groww-range-btn" data-groww-range="1Y">1Y</button>
+                        <button type="button" class="groww-range-btn" data-groww-range="ALL">ALL</button>
+                    </div>
+                </div>
+                <div class="groww-chart-wrap">
+                    <canvas id="growwBalanceChart" aria-label="Interactive running balance chart" role="img"></canvas>
+                    <div id="growwBalanceEmpty" class="groww-empty">No balance data is available for this period.</div>
+                </div>
+                <div class="groww-meta">
+                    <span>Period start: <strong id="growwPeriodStart">—</strong></span>
+                    <span>Period high: <strong id="growwPeriodHigh">₹0.00</strong></span>
+                    <span>Period low: <strong id="growwPeriodLow">₹0.00</strong></span>
+                </div>
+            </div>
+
             <div class="card col-12">
                 <div class="card-title">💰 Balance Growth (Scroll to navigate, Pinch to zoom)</div>
                 <canvas id="balanceChart"></canvas>
@@ -782,6 +848,8 @@
         let charts = {}; // Store chart instances
         let dashboardTransactionData = []; // Full IncludeInBalance-filtered dataset
         let selectedExpenseMonth = "all";
+        let growwBalanceTimeline = [];
+        let selectedGrowwRange = "1M";
 
         const formatCurrency = (num) => num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -854,6 +922,8 @@
             });
 
             updateCounters(totalInc, totalExp, runningBalance);
+            buildGrowwBalanceTimeline(data);
+            drawGrowwBalanceChart();
             drawBalanceChart(balanceTimeline);
             drawCategoryChart(data);
             drawPieChart(totalInc, totalExp);
@@ -881,6 +951,193 @@
             };
             window.requestAnimationFrame(step);
         }
+
+
+        function buildGrowwBalanceTimeline(data) {
+            let balance = 0;
+            growwBalanceTimeline = [...data]
+                .filter(item => item.date instanceof Date && !isNaN(item.date) && Number.isFinite(Number(item.amount)))
+                .sort((a, b) => a.date - b.date)
+                .map(item => {
+                    balance += item.type === "Income" ? Number(item.amount) : -Number(item.amount);
+                    return {
+                        date: new Date(item.date),
+                        label: formatDate(item.date),
+                        balance,
+                        change: item.type === "Income" ? Number(item.amount) : -Number(item.amount),
+                        category: item.category,
+                        type: item.type
+                    };
+                });
+        }
+
+        function getGrowwRangeStart(range, latestDate) {
+            const start = new Date(latestDate);
+            switch (range) {
+                case "1D": start.setDate(start.getDate()); break;
+                case "1W": start.setDate(start.getDate() - 6); break;
+                case "1M": start.setMonth(start.getMonth() - 1); break;
+                case "3M": start.setMonth(start.getMonth() - 3); break;
+                case "6M": start.setMonth(start.getMonth() - 6); break;
+                case "1Y": start.setFullYear(start.getFullYear() - 1); break;
+                default: return new Date(growwBalanceTimeline[0]?.date || latestDate);
+            }
+            start.setHours(0, 0, 0, 0);
+            return start;
+        }
+
+        function drawGrowwBalanceChart() {
+            const canvas = document.getElementById("growwBalanceChart");
+            const emptyState = document.getElementById("growwBalanceEmpty");
+            if (!canvas) return;
+
+            if (charts.growwBalance) {
+                charts.growwBalance.destroy();
+                charts.growwBalance = null;
+            }
+
+            const validTimeline = growwBalanceTimeline.filter(point =>
+                point.date instanceof Date && !isNaN(point.date) && Number.isFinite(point.balance)
+            );
+            const valueElement = document.getElementById("growwBalanceValue");
+            const changeElement = document.getElementById("growwBalanceChange");
+            const startElement = document.getElementById("growwPeriodStart");
+            const highElement = document.getElementById("growwPeriodHigh");
+            const lowElement = document.getElementById("growwPeriodLow");
+
+            if (!validTimeline.length) {
+                canvas.style.display = "none";
+                if (emptyState) emptyState.style.display = "flex";
+                valueElement.textContent = "₹0.00";
+                changeElement.className = "groww-change neutral";
+                changeElement.innerHTML = "<span>No balance data available</span>";
+                startElement.textContent = "—";
+                highElement.textContent = "₹0.00";
+                lowElement.textContent = "₹0.00";
+                return;
+            }
+
+            canvas.style.display = "block";
+            if (emptyState) emptyState.style.display = "none";
+
+            const latest = validTimeline[validTimeline.length - 1];
+            const rangeStart = getGrowwRangeStart(selectedGrowwRange, latest.date);
+            let startIndex = selectedGrowwRange === "ALL"
+                ? 0
+                : validTimeline.findIndex(point => point.date >= rangeStart);
+            if (startIndex < 0) startIndex = validTimeline.length - 1;
+
+            // Keep the balance immediately before the selected range as the baseline,
+            // so period change reflects the true net movement within that range.
+            const baseline = startIndex > 0 ? validTimeline[startIndex - 1].balance : 0;
+            const visibleTimeline = validTimeline.slice(startIndex);
+            const visibleValues = visibleTimeline.map(point => point.balance);
+            const periodEnd = visibleTimeline[visibleTimeline.length - 1];
+            const periodChange = periodEnd.balance - baseline;
+            const percentChange = baseline !== 0 ? (periodChange / Math.abs(baseline)) * 100 : null;
+            const periodHigh = Math.max(...visibleValues);
+            const periodLow = Math.min(...visibleValues);
+
+            valueElement.textContent = `₹${Number(latest.balance).toFixed(2)}`;
+            const sign = periodChange > 0 ? "+" : "";
+            const percentText = percentChange === null
+                ? "—"
+                : `${percentChange > 0 ? "+" : ""}${Number(percentChange).toFixed(2)}%`;
+            changeElement.className = `groww-change ${periodChange > 0 ? "positive" : periodChange < 0 ? "negative" : "neutral"}`;
+            changeElement.innerHTML = `<span>${sign}₹${Number(periodChange).toFixed(2)} (${percentText})</span><span>in ${selectedGrowwRange === "ALL" ? "all time" : selectedGrowwRange}</span>`;
+            startElement.textContent = formatDate(visibleTimeline[0].date);
+            highElement.textContent = `₹${Number(periodHigh).toFixed(2)}`;
+            lowElement.textContent = `₹${Number(periodLow).toFixed(2)}`;
+
+            document.querySelectorAll("[data-groww-range]").forEach(button => {
+                button.classList.toggle("active", button.dataset.growwRange === selectedGrowwRange);
+            });
+
+            const context = canvas.getContext("2d");
+            const gradient = context.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, "rgba(34, 197, 94, 0.26)");
+            gradient.addColorStop(1, "rgba(34, 197, 94, 0.00)");
+
+            charts.growwBalance = new Chart(context, {
+                type: "line",
+                data: {
+                    labels: visibleTimeline.map(point => point.label),
+                    datasets: [{
+                        label: "Running Balance",
+                        data: visibleTimeline.map(point => point.balance),
+                        borderColor: "#22c55e",
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.28,
+                        borderWidth: 2.5,
+                        pointRadius: visibleTimeline.length > 35 ? 0 : 2,
+                        pointHoverRadius: 5,
+                        pointBackgroundColor: "#22c55e",
+                        pointBorderColor: "#0b0f19",
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: "index", intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            displayColors: false,
+                            backgroundColor: "#0b1220",
+                            borderColor: "rgba(34,197,94,.35)",
+                            borderWidth: 1,
+                            titleColor: "#cbd5e1",
+                            bodyColor: "#ffffff",
+                            callbacks: {
+                                label: context => `Balance: ₹${Number(context.raw).toFixed(2)}`,
+                                afterLabel: context => {
+                                    const point = visibleTimeline[context.dataIndex];
+                                    return point ? `${point.type}: ${point.change >= 0 ? "+" : ""}₹${Number(point.change).toFixed(2)} · ${point.category}` : "";
+                                }
+                            }
+                        },
+                        zoom: {
+                            pan: { enabled: true, mode: "x", threshold: 5 },
+                            zoom: {
+                                wheel: { enabled: true, speed: 0.03 },
+                                pinch: { enabled: true },
+                                mode: "x",
+                                limits: { x: { minRange: 4 } }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: "#94a3b8",
+                                maxTicksLimit: 7,
+                                maxRotation: 0,
+                                autoSkip: true
+                            },
+                            border: { display: false }
+                        },
+                        y: {
+                            grid: { color: "rgba(148,163,184,.10)" },
+                            ticks: {
+                                color: "#94a3b8",
+                                callback: value => `₹${Number(value).toFixed(2)}`
+                            },
+                            border: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.querySelectorAll("[data-groww-range]").forEach(button => {
+            button.addEventListener("click", () => {
+                selectedGrowwRange = button.dataset.growwRange;
+                drawGrowwBalanceChart();
+            });
+        });
 
         function drawBalanceChart(timeline) {
             const ctx = document.getElementById('balanceChart').getContext('2d');
@@ -1194,6 +1451,7 @@
         }
 
         function resetCharts() {
+            if (charts.growwBalance) charts.growwBalance.resetZoom();
             if (charts.balance) charts.balance.resetZoom();
             if (charts.bar) charts.bar.resetZoom();
             if (charts.monthlyBar) charts.monthlyBar.resetZoom();
