@@ -160,6 +160,32 @@
             margin-bottom: 0;
         }
 
+        .expense-chart-controls {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .category-expense-total {
+            color: var(--danger);
+            font-size: 13px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .expense-chart-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .category-expense-total {
+                font-size: 12px;
+            }
+        }
+
         .filter-bar {
             display: flex;
             flex-wrap: wrap;
@@ -641,7 +667,17 @@
             </div>
 
             <div class="card col-8">
-                <div class="card-title">📉 Expense Breakdown by Category</div>
+                <div class="card-header-row expense-chart-header">
+                    <div class="card-title">📉 Expense Breakdown by Category</div>
+                    <div class="expense-chart-controls">
+                        <span id="categoryExpenseTotal" class="category-expense-total">Total Expense: ₹0.00</span>
+                        <select id="expenseMonthFilter" class="filter-action"
+                            aria-label="Filter expense breakdown by month"
+                            style="background:#111827;color:var(--text-main);border:1px solid var(--border);max-width:180px;">
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
+                </div>
                 <canvas id="categoryChart"></canvas>
             </div>
 
@@ -744,6 +780,8 @@
             border: "#1f2937"
         };
         let charts = {}; // Store chart instances
+        let dashboardTransactionData = []; // Full IncludeInBalance-filtered dataset
+        let selectedExpenseMonth = "all";
 
         const formatCurrency = (num) => num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -785,9 +823,19 @@
                 renderDashboard(cleanData);
                 document.getElementById('loader').style.opacity = '0';
                 setTimeout(() => document.getElementById('loader').style.visibility = 'hidden', 500);
+            })
+            .catch(error => {
+                console.error("Failed to load Google Sheet data:", error);
+                const loader = document.getElementById("loader");
+                if (loader) {
+                    loader.innerHTML = '<div style="text-align:center;padding:24px;"><h2>Unable to load data</h2><p style="margin-top:8px;color:var(--text-muted);">Please check the Google Sheet connection and try again.</p></div>';
+                }
             });
 
         function renderDashboard(data) {
+            dashboardTransactionData = [...data];
+            populateExpenseMonthFilter(data);
+
             let runningBalance = 0;
             let totalInc = 0;
             let totalExp = 0;
@@ -807,7 +855,7 @@
 
             updateCounters(totalInc, totalExp, runningBalance);
             drawBalanceChart(balanceTimeline);
-            drawCategoryChart(catTotals);
+            drawCategoryChart(data);
             drawPieChart(totalInc, totalExp);
             updateRecentTransactions(data);
             drawIncomeExpenseBarChart(data);
@@ -888,43 +936,115 @@
             });
         }
 
-        function drawCategoryChart(catData) {
-            const labels = Object.keys(catData);
-            charts.category = new Chart(document.getElementById('categoryChart'), {
-                type: 'bar',
+        function getMonthKey(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        }
+
+        function formatMonthLabel(monthKey) {
+            const [year, month] = monthKey.split("-").map(Number);
+            const date = new Date(year, month - 1, 1);
+            return date.toLocaleString("en-US", {
+                month: "short",
+                year: "2-digit"
+            });
+        }
+
+        function populateExpenseMonthFilter(data) {
+            const select = document.getElementById("expenseMonthFilter");
+            if (!select) return;
+
+            const previousValue = select.value || selectedExpenseMonth;
+            const monthKeys = [...new Set(
+                data
+                    .filter(item => item.type !== "Income" && item.date instanceof Date && !isNaN(item.date))
+                    .map(item => getMonthKey(item.date))
+            )].sort();
+
+            select.innerHTML = '<option value="all">All Time</option>' +
+                monthKeys.map(key => `<option value="${key}">${formatMonthLabel(key)}</option>`).join("");
+
+            const hasPreviousValue = monthKeys.includes(previousValue);
+            select.value = previousValue === "all" || hasPreviousValue ? previousValue : "all";
+            selectedExpenseMonth = select.value;
+
+            select.onchange = () => {
+                selectedExpenseMonth = select.value;
+                drawCategoryChart(dashboardTransactionData);
+            };
+        }
+
+        function drawCategoryChart(data) {
+            const filteredData = selectedExpenseMonth === "all"
+                ? data
+                : data.filter(item => getMonthKey(item.date) === selectedExpenseMonth);
+
+            const totalExpenseForPeriod = filteredData.reduce((total, item) => {
+                return item.type === "Income" ? total : total + Number(item.amount || 0);
+            }, 0);
+
+            const totalElement = document.getElementById("categoryExpenseTotal");
+            if (totalElement) {
+                const periodLabel = selectedExpenseMonth === "all"
+                    ? "All Time"
+                    : formatMonthLabel(selectedExpenseMonth);
+                totalElement.textContent = `Total Expense (${periodLabel}): ₹${Number(totalExpenseForPeriod).toFixed(2)}`;
+            }
+
+            const categoryTotals = {};
+            filteredData.forEach(item => {
+                if (item.type === "Income") return;
+                const category = item.category || "Other";
+                categoryTotals[category] = (categoryTotals[category] || 0) + Number(item.amount || 0);
+            });
+
+            const sortedEntries = Object.entries(categoryTotals)
+                .sort((a, b) => b[1] - a[1]);
+            const labels = sortedEntries.map(([category]) => category);
+            const values = sortedEntries.map(([, amount]) => amount);
+
+            if (charts.category) charts.category.destroy();
+
+            charts.category = new Chart(document.getElementById("categoryChart"), {
+                type: "bar",
                 data: {
-                    labels: labels,
-                    datasets: [{ data: Object.values(catData), backgroundColor: theme.primary, borderRadius: 8 }]
+                    labels,
+                    datasets: [{
+                        label: "Expense",
+                        data: values,
+                        backgroundColor: theme.primary,
+                        borderRadius: 8
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: context => `Expense: ₹${Number(context.raw).toFixed(2)}`
+                            }
+                        },
                         zoom: {
-                            pan: { enabled: true, mode: 'x', threshold: 5 },
+                            pan: { enabled: true, mode: "x", threshold: 5 },
                             zoom: {
-                                wheel: {
-                                    enabled: true,
-                                    speed: 0.03
-                                },
-                                pinch: {
-                                    enabled: true
-                                },
-                                mode: 'x',
-                                limits: {
-                                    x: {
-                                        minRange: 4
-                                    }
-                                }
+                                wheel: { enabled: true, speed: 0.03 },
+                                pinch: { enabled: true },
+                                mode: "x",
+                                limits: { x: { minRange: 4 } }
                             }
                         }
                     },
                     scales: {
                         x: {
-                            // Limit visible bars to 5 if many exist
-                            min: labels.length > 5 ? labels[0] : undefined,
-                            max: labels.length > 5 ? labels[4] : undefined
+                            min: labels.length > 5 ? 0 : undefined,
+                            max: labels.length > 5 ? 4 : undefined
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: value => "₹" + Number(value).toFixed(2)
+                            }
                         }
                     }
                 }
