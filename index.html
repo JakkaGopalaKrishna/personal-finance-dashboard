@@ -846,7 +846,7 @@
             border: "#1f2937"
         };
         let charts = {}; // Store chart instances
-        let dashboardTransactionData = []; // Full IncludeInBalance-filtered dataset
+        let dashboardTransactionData = []; // Full includedTransactions-filtered dataset
         let selectedExpenseMonth = "all";
         let growwBalanceTimeline = [];
         let selectedGrowwRange = "1M";
@@ -865,15 +865,16 @@
             .then(data => {
                 const json = JSON.parse(data.substring(47).slice(0, -2));
                 const rawRows = json.table.rows;
-                console.log("rawRows :", rawRows);
+                // console.log("rawRows :", rawRows);
 
-                // Include transaction only when IncludeInBalance is TRUE
-                const IncludeInBalance = rawRows.filter(r => {
-                    return r.c[7]?.v === true ||
-                        String(r.c[7]?.v).toUpperCase() === "TRUE";
-                })
-                console.log("IncludeInBalance :", IncludeInBalance);
-                const cleanData = IncludeInBalance.map(r => ({
+                // Exclude only transactions explicitly marked FALSE
+                const includedTransactions = rawRows.filter(r => {
+                    const value = r.c[7]?.v;
+                    return String(value ?? "").trim().toUpperCase() !== "FALSE";
+                });
+                // console.log("IncludedTransactions :", includedTransactions);
+                
+                const cleanData = includedTransactions.map(r => ({
                     date: (() => {
                         const v = r.c[1]?.v;
                         if (typeof v === "string" && v.startsWith("Date(")) {
@@ -887,7 +888,7 @@
                     category: (r.c[4]?.v || "Other").trim()
                 })).sort((a, b) => a.date - b.date);
 
-                console.log("cleanData :", cleanData);
+                // console.log("cleanData :", cleanData);
                 renderDashboard(cleanData);
                 document.getElementById('loader').style.opacity = '0';
                 setTimeout(() => document.getElementById('loader').style.visibility = 'hidden', 500);
