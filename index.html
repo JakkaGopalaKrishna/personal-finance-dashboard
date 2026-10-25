@@ -577,6 +577,43 @@
             gap: 10px 16px;
         }
 
+        .footer-payment-field {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 7px 10px;
+            border: 1px solid rgba(34, 197, 94, 0.28);
+            border-radius: 10px;
+            background: rgba(34, 197, 94, 0.07);
+        }
+
+        .footer-payment-field label {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .footer-payment-field select {
+            min-width: 90px;
+            max-width: 160px;
+            padding: 5px 24px 5px 9px;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 7px;
+            outline: none;
+            background: #080d17;
+            color: var(--text-main);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .footer-payment-field select option {
+            background: #080d17;
+            color: var(--text-main);
+        }
+
         .footer-version {
             color: var(--text-muted);
             font-size: 11px;
@@ -616,6 +653,16 @@
             .footer-meta {
                 width: 100%;
                 justify-content: space-between;
+                gap: 10px;
+            }
+
+            .footer-payment-field {
+                flex: 1 1 100%;
+                justify-content: space-between;
+            }
+
+            .footer-payment-field select {
+                flex: 0 1 150px;
             }
         }
 
@@ -903,7 +950,6 @@
                 <div id="categorySummaryContainer" style="overflow-x: auto;"></div>
             </div>
         </section>
-        
         <footer class="app-footer">
             <div class="footer-brand">
                 <img src="JGK_MoneyHaven_Logo.png" alt="JGK MoneyHaven Logo" class="app-icon">
@@ -914,7 +960,13 @@
             </div>
 
             <div class="footer-meta">
-                <span class="footer-version">Version 5.3</span>
+                <div class="footer-payment-field">
+                    <label for="paymentMethodFilter">Payment Method</label>
+                    <select id="paymentMethodFilter" aria-label="Filter the entire dashboard by payment method">
+                        <option value="UPI" selected>UPI</option>
+                    </select>
+                </div>
+                <span class="footer-version">Version 5.4</span>
                 <a class="footer-data-link" target="_blank" rel="noopener noreferrer"
                     href="https://docs.google.com/spreadsheets/d/1nAqs_jnqmHzLajhToxoTRL1qfREOoAC5QdQEoXFLq8c?resourcekey=&usp=forms_web_b&urp=linked#gid=1311355495"
                     aria-label="Open Google Sheets transaction data">
@@ -942,7 +994,10 @@
             border: "#1f2937"
         };
         let charts = {}; // Store chart instances
-        let dashboardTransactionData = []; // Full includedTransactions-filtered dataset
+        let allIncludedTransactionData = []; // All rows allowed by IncludeInTransaction
+        let dashboardTransactionData = []; // Data after the global payment-method filter
+        let availablePaymentMethods = [];
+        let selectedPaymentMethod = "UPI";
         let selectedExpenseMonth = "";
         let growwBalanceTimeline = [];
         let selectedGrowwRange = "ALL";
@@ -962,7 +1017,7 @@
             .then(data => {
                 const json = JSON.parse(data.substring(47).slice(0, -2));
                 const rawRows = json.table.rows;
-                // console.log("rawRows :", rawRows);
+                const paymentMethodColumn = detectPaymentMethodColumn(json.table.cols || [], rawRows);
 
                 // Exclude only transactions explicitly marked FALSE
                 const includedTransactions = rawRows.filter(r => {
@@ -980,13 +1035,15 @@
                         }
                         return v instanceof Date ? v : new Date(v);
                     })(),
-                    type: (r.c[2]?.v || "").trim(),
+                    type: String(r.c[2]?.v || "").trim(),
                     amount: Number(r.c[3]?.v || 0),
-                    category: (r.c[4]?.v || "Other").trim()
+                    category: String(r.c[4]?.v || "Other").trim(),
+                    paymentMethod: String(r.c[paymentMethodColumn]?.v ?? "").trim()
                 })).sort((a, b) => a.date - b.date);
 
-                // console.log("cleanData :", cleanData);
-                renderDashboard(cleanData);
+                allIncludedTransactionData = cleanData;
+                populatePaymentMethodFilter(cleanData);
+                renderDashboard(getPaymentMethodFilteredData());
                 document.getElementById('loader').style.opacity = '0';
                 setTimeout(() => document.getElementById('loader').style.visibility = 'hidden', 500);
             })
@@ -997,6 +1054,72 @@
                     loader.innerHTML = '<div style="text-align:center;padding:24px;"><h2>Unable to load data</h2><p style="margin-top:8px;color:var(--text-muted);">Please check the Google Sheet connection and try again.</p></div>';
                 }
             });
+
+        function detectPaymentMethodColumn(columns, rows) {
+            // Prefer the column header so this continues working if the sheet layout changes.
+            const headerIndex = columns.findIndex(col => /payment\s*method|payment\s*mode|method of payment/i.test(String(col.label || col.id || "")));
+            if (headerIndex >= 0) return headerIndex;
+
+            // Fallback: identify the column containing the most known payment-method values.
+            let bestIndex = -1;
+            let bestScore = 0;
+            const knownMethods = new Set(["UPI", "PF"]);
+            const maxColumns = Math.max(0, ...rows.map(row => (row.c || []).length));
+            for (let index = 0; index < maxColumns; index++) {
+                const score = rows.reduce((count, row) => {
+                    const value = String(row.c?.[index]?.v ?? "").trim().toUpperCase();
+                    return count + (knownMethods.has(value) ? 1 : 0);
+                }, 0);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestIndex = index;
+                }
+            }
+            return bestIndex;
+        }
+
+        function populatePaymentMethodFilter(data) {
+            const select = document.getElementById("paymentMethodFilter");
+            if (!select) return;
+
+            availablePaymentMethods = [...new Set(data
+                .map(item => String(item.paymentMethod || "").trim())
+                .filter(Boolean))]
+                .sort((a, b) => a.localeCompare(b));
+
+            // Use actual values from the sheet. Prefer UPI on first load, as requested.
+            select.innerHTML = availablePaymentMethods
+                .map(method => `<option value="${escapeHtml(method)}">${escapeHtml(method)}</option>`)
+                .join("");
+
+            if (!availablePaymentMethods.length) {
+                select.innerHTML = '<option value="">No methods found</option>';
+                select.disabled = true;
+                selectedPaymentMethod = "";
+                return;
+            }
+
+            select.disabled = false;
+            if (!selectedPaymentMethod || !availablePaymentMethods.includes(selectedPaymentMethod)) {
+                selectedPaymentMethod = availablePaymentMethods.includes("UPI") ? "UPI" : availablePaymentMethods[0];
+            }
+            select.value = selectedPaymentMethod;
+            select.onchange = () => {
+                selectedPaymentMethod = select.value;
+                renderDashboard(getPaymentMethodFilteredData());
+            };
+        }
+
+        function getPaymentMethodFilteredData() {
+            if (!selectedPaymentMethod) return [...allIncludedTransactionData];
+            return allIncludedTransactionData.filter(item => item.paymentMethod === selectedPaymentMethod);
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, char => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+            })[char]);
+        }
 
         function renderDashboard(data) {
             dashboardTransactionData = [...data];
@@ -1358,7 +1481,8 @@
         }
 
         function drawPieChart(inc, exp) {
-            new Chart(document.getElementById('pieChart'), {
+            if (charts.pie) charts.pie.destroy();
+            charts.pie = new Chart(document.getElementById('pieChart'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Income', 'Expense'],
