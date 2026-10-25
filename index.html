@@ -525,12 +525,98 @@
             background: var(--border);
         }
 
+        /* Version 5.3 footer */
+        .app-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 24px;
+            padding: 18px 20px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.96), rgba(15, 23, 42, 0.78));
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
         .app-icon {
             display: block;
-            margin: 20px auto 0;
-            width: 180px;
-            max-width: 80%;
-            opacity: 0.9;
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+            flex: 0 0 auto;
+            border-radius: 10px;
+        }
+
+        .footer-brand-name {
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .footer-caption {
+            margin-top: 3px;
+            color: var(--text-muted);
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .footer-meta {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+        }
+
+        .footer-version {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 9px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 8px;
+            background: rgba(148, 163, 184, 0.06);
+        }
+
+        .footer-data-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: #c7d2fe;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            padding: 8px 11px;
+            border: 1px solid rgba(99, 102, 241, 0.32);
+            border-radius: 9px;
+            background: rgba(99, 102, 241, 0.10);
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .footer-data-link:hover {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: rgba(99, 102, 241, 0.58);
+        }
+
+        @media (max-width: 600px) {
+            .app-footer {
+                align-items: flex-start;
+                padding: 15px 13px;
+            }
+
+            .footer-meta {
+                width: 100%;
+                justify-content: space-between;
+            }
         }
 
         @media (max-width: 500px) {
@@ -653,7 +739,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <main class="container">
         <header>
             <div class="brand">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -670,7 +756,7 @@
             </div>
         </header>
 
-        <div class="stats-grid">
+        <section class="stats-grid">
             <div class="stat-card" style="border-color: var(--success)">
                 <div class="stat-label">Total Income</div>
                 <div class="stat-value" id="incomeCount">₹0.00</div>
@@ -683,9 +769,9 @@
                 <div class="stat-label">Current Balance</div>
                 <div class="stat-value" id="savingsCount">₹0.00</div>
             </div>
-        </div>
+        </section>
 
-        <div class="dashboard-grid">
+        <section class="dashboard-grid">
 
             <div class="card col-12 groww-card">
                 <div class="groww-topline">
@@ -816,13 +902,28 @@
                 <div class="card-title">📋 Category Summary</div>
                 <div id="categorySummaryContainer" style="overflow-x: auto;"></div>
             </div>
-        </div>
-    </div>
-    <img src="JGK_MoneyHaven_Logo.png" alt="JGK MoneyHaven Logo" class="app-icon">
-    <a target="_blank"
-        href="https://docs.google.com/spreadsheets/d/1nAqs_jnqmHzLajhToxoTRL1qfREOoAC5QdQEoXFLq8c?resourcekey=&usp=forms_web_b&urp=linked#gid=1311355495">
-        _data
-    </a>
+        </section>
+        
+        <footer class="app-footer">
+            <div class="footer-brand">
+                <img src="JGK_MoneyHaven_Logo.png" alt="JGK MoneyHaven Logo" class="app-icon">
+                <div>
+                    <div class="footer-brand-name">JGK MoneyHaven PRO</div>
+                    <div class="footer-caption">Personal finance dashboard · Track your money with clarity</div>
+                </div>
+            </div>
+
+            <div class="footer-meta">
+                <span class="footer-version">Version 5.3</span>
+                <a class="footer-data-link" target="_blank" rel="noopener noreferrer"
+                    href="https://docs.google.com/spreadsheets/d/1nAqs_jnqmHzLajhToxoTRL1qfREOoAC5QdQEoXFLq8c?resourcekey=&usp=forms_web_b&urp=linked#gid=1311355495"
+                    aria-label="Open Google Sheets transaction data">
+                    <span aria-hidden="true">↗</span>
+                    <span>Google Sheets Data</span>
+                </a>
+            </div>
+        </footer>
+    </main>
 
 
     <script>
