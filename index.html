@@ -718,11 +718,6 @@
             </div>
 
             <div class="card col-12">
-                <div class="card-title">💰 Balance Growth (Scroll to navigate, Pinch to zoom)</div>
-                <canvas id="balanceChart"></canvas>
-            </div>
-
-            <div class="card col-12">
                 <div class="card-title">📊 Income vs Expense by Category</div>
                 <canvas id="incomeExpenseBarChart"></canvas>
             </div>
@@ -847,9 +842,10 @@
         };
         let charts = {}; // Store chart instances
         let dashboardTransactionData = []; // Full includedTransactions-filtered dataset
-        let selectedExpenseMonth = "all";
+        let selectedExpenseMonth = "";
         let growwBalanceTimeline = [];
-        let selectedGrowwRange = "1M";
+        let selectedGrowwRange = "ALL";
+        let growwInitialZoomPending = true;
 
         const formatCurrency = (num) => num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -909,7 +905,6 @@
             let totalInc = 0;
             let totalExp = 0;
             const catTotals = {};
-            const balanceTimeline = [];
 
             data.forEach(item => {
                 const change = item.type === "Income" ? item.amount : -item.amount;
@@ -919,13 +914,11 @@
                     totalExp += item.amount;
                     catTotals[item.category] = (catTotals[item.category] || 0) + item.amount;
                 }
-                balanceTimeline.push({ date: formatDate(item.date), balance: runningBalance, change: change, label: item.category });
             });
 
             updateCounters(totalInc, totalExp, runningBalance);
             buildGrowwBalanceTimeline(data);
             drawGrowwBalanceChart();
-            drawBalanceChart(balanceTimeline);
             drawCategoryChart(data);
             drawPieChart(totalInc, totalExp);
             updateRecentTransactions(data);
@@ -1111,6 +1104,10 @@
                     },
                     scales: {
                         x: {
+                            // On first load, show the latest five transaction points while ALL remains selected.
+                            ...(growwInitialZoomPending && selectedGrowwRange === "ALL" && visibleTimeline.length > 5
+                                ? { min: visibleTimeline.length - 5, max: visibleTimeline.length - 1 }
+                                : {}),
                             grid: { display: false },
                             ticks: {
                                 color: "#94a3b8",
@@ -1131,6 +1128,7 @@
                     }
                 }
             });
+            growwInitialZoomPending = false;
         }
 
         document.querySelectorAll("[data-groww-range]").forEach(button => {
@@ -1139,60 +1137,6 @@
                 drawGrowwBalanceChart();
             });
         });
-
-        function drawBalanceChart(timeline) {
-            const ctx = document.getElementById('balanceChart').getContext('2d');
-            const labels = timeline.map(t => t.date);
-
-            charts.balance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Balance',
-                        data: timeline.map(t => t.balance),
-                        borderColor: theme.primary,
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        zoom: {
-                            pan: { enabled: true, mode: 'x', threshold: 5 },
-                            zoom: {
-                                wheel: {
-                                    enabled: true,
-                                    speed: 0.03
-                                },
-                                pinch: {
-                                    enabled: true
-                                },
-                                mode: 'x',
-                                limits: {
-                                    x: {
-                                        minRange: 4
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            // Limit visible bars to 5 if many exist
-                            min: labels.length > 10 ? labels.length - 10 : 0,
-                            max: labels.length > 10 ? labels.length - 1 : labels.length - 1
-                        },
-                        y: { ticks: { callback: v => '₹' + formatCurrency(v) } }
-                    }
-                }
-            });
-        }
 
         function getMonthKey(date) {
             return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -1211,18 +1155,21 @@
             const select = document.getElementById("expenseMonthFilter");
             if (!select) return;
 
-            const previousValue = select.value || selectedExpenseMonth;
+            // Preserve the user's selection on refresh; on first load, default to the latest month.
+            const previousValue = selectedExpenseMonth;
             const monthKeys = [...new Set(
                 data
                     .filter(item => item.type !== "Income" && item.date instanceof Date && !isNaN(item.date))
                     .map(item => getMonthKey(item.date))
-            )].sort();
+            )].sort((a, b) => b.localeCompare(a));
 
-            select.innerHTML = '<option value="all">All Time</option>' +
-                monthKeys.map(key => `<option value="${key}">${formatMonthLabel(key)}</option>`).join("");
+            select.innerHTML = monthKeys.map(key => `<option value="${key}">${formatMonthLabel(key)}</option>`).join("") +
+                '<option value="all">All Time</option>';
 
             const hasPreviousValue = monthKeys.includes(previousValue);
-            select.value = previousValue === "all" || hasPreviousValue ? previousValue : "all";
+            select.value = previousValue === "all" || hasPreviousValue
+                ? previousValue
+                : (monthKeys[0] || "all");
             selectedExpenseMonth = select.value;
 
             select.onchange = () => {
@@ -1453,7 +1400,6 @@
 
         function resetCharts() {
             if (charts.growwBalance) charts.growwBalance.resetZoom();
-            if (charts.balance) charts.balance.resetZoom();
             if (charts.bar) charts.bar.resetZoom();
             if (charts.monthlyBar) charts.monthlyBar.resetZoom();
             if (charts.category) charts.category.resetZoom();
