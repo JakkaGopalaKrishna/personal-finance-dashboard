@@ -60,6 +60,61 @@
             margin: auto;
         }
 
+        .pro-pulse {
+            color: gold;
+            font-weight: 700;
+            animation: glowPulse 1.8s infinite alternate;
+        }
+
+        @keyframes glowPulse {
+            from {
+                text-shadow:
+                    0 0 5px #ffd700,
+                    0 0 10px #ffd700;
+            }
+
+            to {
+                text-shadow:
+                    0 0 10px #ffd700,
+                    0 0 25px #ffb700,
+                    0 0 40px rgba(255, 215, 0, 1);
+            }
+        }
+
+        .brand-glow {
+            color: #6366f1;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            animation: brandGlowPulse 2s infinite alternate;
+        }
+
+        @keyframes brandGlowPulse {
+            from {
+                text-shadow:
+                    0 0 4px #6366f1,
+                    0 0 8px rgba(99, 102, 241, 0.6);
+            }
+
+            to {
+                text-shadow:
+                    0 0 10px #6366f1,
+                    0 0 20px rgba(99, 102, 241, 0.9),
+                    0 0 35px rgba(99, 102, 241, 1);
+            }
+        }
+
+        .brand-glow:hover {
+            text-shadow:
+                0 0 12px #6366f1,
+                0 0 28px rgba(99, 102, 241, 1),
+                0 0 50px rgba(99, 102, 241, 1);
+        }
+
+        .app-icon {
+            width: 300px;
+            height: 200px;
+        }
+
         header {
             display: flex;
             flex-wrap: wrap;
@@ -374,17 +429,76 @@
         }
 
         .transaction-table {
-            width: 100%;
+            width: 1200px;
+            min-width: 1200px;
+            table-layout: fixed;
             border-collapse: collapse;
             font-size: 13px;
-            min-width: 520px;
+            transition: width 0.2s ease, min-width 0.2s ease;
+        }
+
+        /* When notes are off, the table contracts to the four data columns. */
+        .transaction-table.hide-notes {
+            width: 200px;
+            min-width: 200px;
+        }
+
+        /* Fixed pixel widths: compact detail columns + wide note column. */
+        .transaction-table col.date-col,
+        .transaction-table col.category-col,
+        .transaction-table col.type-col,
+        .transaction-table col.amount-col {
+            width: 150px;
+        }
+
+        .transaction-table col.note-col {
+            width: 1500px;
+        }
+
+        .transaction-table tbody tr {
+            height: 30px !important;
         }
 
         .transaction-table th,
         .transaction-table td {
-            padding: 10px;
+            height: 20px !important;
+            max-height: 20px !important;
+            box-sizing: border-box;
+            padding: 0 6px;
             border-bottom: 1px solid var(--border);
             text-align: left;
+            vertical-align: middle;
+            white-space: nowrap !important;
+            word-break: normal !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis;
+            line-height: 20px;
+        }
+
+        .transaction-table td.note-column {
+            max-width: 0;
+        }
+
+        .transaction-table td.note-column .note-text {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: 20px;
+            box-sizing: border-box;
+            padding: 0 6px;
+            border-radius: 4px;
+            background: rgba(148, 163, 184, 0.12);
+            color: var(--text-main);
+            line-height: 20px;
+            white-space: nowrap !important;
+            word-break: normal !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis;
+            cursor: help;
+        }
+
+        .transaction-table tbody tr:hover {
+            background: rgba(148, 163, 184, 0.045);
         }
 
         .transaction-table th {
@@ -475,37 +589,158 @@
 
 
         /* Groww-style running balance chart */
-        .groww-card { padding: 18px 18px 14px; }
-        .groww-topline { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
-        .groww-eyebrow { color:var(--text-muted); font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
-        .groww-main-value { font-size:24px; font-weight:800; letter-spacing:-.04em; margin-top:5px; line-height:1.2; }
-        .groww-change { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-top:7px; font-size:13px; font-weight:700; }
-        .groww-change.positive { color:#22c55e; } .groww-change.negative { color:#fb7185; } .groww-change.neutral { color:var(--text-muted); }
-        .groww-chart-wrap { position:relative; height:300px; margin:14px 0 12px; }
-        .groww-range-controls { display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
-        .groww-range-btn { border:1px solid transparent; color:var(--text-muted); background:transparent; border-radius:9px; padding:7px 12px; font-size:12px; font-weight:800; cursor:pointer; transition:all .18s ease; }
-        .groww-range-btn:hover { color:var(--text-main); background:rgba(34,197,94,.08); }
-        .groww-range-btn.active { color:#07130d; background:#22c55e; }
-        .groww-meta {
-            display:grid;
-            grid-template-columns:repeat(3, minmax(0, 1fr));
-            gap:10px;
-            color:var(--text-muted);
-            font-size:12px;
-            line-height:1.5;
-            margin-top:12px;
+        .groww-card {
+            padding: 18px 18px 14px;
         }
-        .groww-meta span { display:block; min-width:0; overflow-wrap:anywhere; }
-        .groww-meta strong { color:var(--text-main); font-weight:700; }
-        .groww-chart-wrap canvas { height:100% !important; }
-        .groww-empty { display:none; height:100%; align-items:center; justify-content:center; text-align:center; color:var(--text-muted); font-size:13px; }
+
+        .groww-topline {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .groww-eyebrow {
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .groww-main-value {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -.04em;
+            margin-top: 5px;
+            line-height: 1.2;
+        }
+
+        .groww-change {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 7px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .groww-change.positive {
+            color: #22c55e;
+        }
+
+        .groww-change.negative {
+            color: #fb7185;
+        }
+
+        .groww-change.neutral {
+            color: var(--text-muted);
+        }
+
+        .groww-chart-wrap {
+            position: relative;
+            height: 300px;
+            margin: 14px 0 12px;
+        }
+
+        .groww-range-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            align-items: center;
+        }
+
+        .groww-range-btn {
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            background: transparent;
+            border-radius: 9px;
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all .18s ease;
+        }
+
+        .groww-range-btn:hover {
+            color: var(--text-main);
+            background: rgba(34, 197, 94, .08);
+        }
+
+        .groww-range-btn.active {
+            color: #07130d;
+            background: #22c55e;
+        }
+
+        .groww-meta {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            color: var(--text-muted);
+            font-size: 12px;
+            line-height: 1.5;
+            margin-top: 12px;
+        }
+
+        .groww-meta span {
+            display: block;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .groww-meta strong {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .groww-chart-wrap canvas {
+            height: 100% !important;
+        }
+
+        .groww-empty {
+            display: none;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
         @media(max-width:600px) {
-            .groww-card { padding:14px 12px; }
-            .groww-chart-wrap { height:230px; margin:12px 0 18px; }
-            .groww-range-controls { width:100%; justify-content:space-between; gap:2px; }
-            .groww-range-btn { padding:7px 9px; }
-            .groww-meta { grid-template-columns:1fr; gap:7px; margin-top:8px; }
-            .groww-meta span { padding:8px 10px; background:rgba(148,163,184,.06); border:1px solid rgba(148,163,184,.10); border-radius:9px; }
+            .groww-card {
+                padding: 14px 12px;
+            }
+
+            .groww-chart-wrap {
+                height: 230px;
+                margin: 12px 0 18px;
+            }
+
+            .groww-range-controls {
+                width: 100%;
+                justify-content: space-between;
+                gap: 2px;
+            }
+
+            .groww-range-btn {
+                padding: 7px 9px;
+            }
+
+            .groww-meta {
+                grid-template-columns: 1fr;
+                gap: 7px;
+                margin-top: 8px;
+            }
+
+            .groww-meta span {
+                padding: 8px 10px;
+                background: rgba(148, 163, 184, .06);
+                border: 1px solid rgba(148, 163, 184, .10);
+                border-radius: 9px;
+            }
         }
 
         .amount-inc {
@@ -581,6 +816,8 @@
             display: flex;
             align-items: center;
             gap: 9px;
+            min-height: 48px;
+            box-sizing: border-box;
             padding: 7px 10px;
             border: 1px solid rgba(34, 197, 94, 0.28);
             border-radius: 10px;
@@ -614,7 +851,93 @@
             color: var(--text-main);
         }
 
+        .footer-note-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 48px;
+            box-sizing: border-box;
+            padding: 7px 12px;
+            border: 1px solid rgba(99, 102, 241, 0.28);
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.07);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 800;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .footer-note-toggle input {
+            appearance: none;
+            -webkit-appearance: none;
+            position: relative;
+            flex: 0 0 auto;
+            width: 38px;
+            height: 22px;
+            margin: 0;
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            border-radius: 999px;
+            background: #374151;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .footer-note-toggle input::before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform 0.2s ease;
+        }
+
+        .footer-note-toggle input:checked {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .footer-note-toggle input:checked::before {
+            transform: translateX(16px);
+        }
+
+        .footer-note-toggle input:focus-visible {
+            outline: 2px solid #a5b4fc;
+            outline-offset: 3px;
+        }
+
+        #transactionTable.hide-notes col.note-column,
+        #transactionTable.hide-notes th.note-column,
+        #transactionTable.hide-notes td.note-column {
+            display: none !important;
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+        }
+
+        .footer-note-toggle .toggle-status {
+            min-width: 25px;
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .footer-note-toggle.is-on .toggle-status {
+            color: #a5b4fc;
+        }
+
         .footer-version {
+            display: inline-flex;
+            align-items: center;
+            min-height: 48px;
+            box-sizing: border-box;
             color: var(--text-muted);
             font-size: 11px;
             font-weight: 700;
@@ -627,6 +950,8 @@
         .footer-data-link {
             display: inline-flex;
             align-items: center;
+            min-height: 48px;
+            box-sizing: border-box;
             gap: 7px;
             color: #c7d2fe;
             font-size: 12px;
@@ -706,6 +1031,7 @@
                 grid-column: span 4;
             }
         }
+
         @media (max-width: 600px) {
             .filter-bar {
                 padding: 8px;
@@ -757,7 +1083,10 @@
                 width: 100%;
             }
 
-            .transaction-table th, .transaction-table td { padding:8px 6px; }
+            .transaction-table th,
+            .transaction-table td {
+                padding: 8px 6px;
+            }
         }
 
         @media (max-width: 420px) {
@@ -915,13 +1244,21 @@
                 </div>
 
                 <div class="table-wrapper">
-                    <table class="transaction-table">
+                    <table id="transactionTable" class="transaction-table">
+                        <colgroup>
+                            <col class="date-col">
+                            <col class="category-col">
+                            <col class="type-col">
+                            <col class="amount-col">
+                            <col class="note-col note-column">
+                        </colgroup>
                         <thead>
                             <tr>
                                 <th>Date</th>
                                 <th>Category</th>
                                 <th>Type</th>
                                 <th>Amount</th>
+                                <th class="note-column">Note</th>
                             </tr>
                         </thead>
                         <tbody id="transactionList"></tbody>
@@ -938,7 +1275,7 @@
                             <option value="50">50</option>
                         </select>
                     </div>
-                    
+
                     <div class="pagination-rail">
                         <div id="pagination" class="pagination-rail"></div>
                     </div>
@@ -966,7 +1303,14 @@
                         <option value="UPI" selected>UPI</option>
                     </select>
                 </div>
-                <span class="footer-version">Version 5.4</span>
+                <label class="footer-note-toggle" for="showNotesToggle"
+                    title="Show or hide the transaction Note column">
+                    <span>Display Notes</span>
+                    <input id="showNotesToggle" type="checkbox" role="switch" aria-label="Display transaction notes"
+                        aria-checked="false">
+                    <span id="noteToggleStatus" class="toggle-status">OFF</span>
+                </label>
+                <span class="footer-version">Version 6.1</span>
                 <a class="footer-data-link" target="_blank" rel="noopener noreferrer"
                     href="https://docs.google.com/spreadsheets/d/1nAqs_jnqmHzLajhToxoTRL1qfREOoAC5QdQEoXFLq8c?resourcekey=&usp=forms_web_b&urp=linked#gid=1311355495"
                     aria-label="Open Google Sheets transaction data">
@@ -1025,7 +1369,7 @@
                     return String(value ?? "").trim().toUpperCase() !== "FALSE";
                 });
                 // console.log("IncludedTransactions :", includedTransactions);
-                
+
                 const cleanData = includedTransactions.map(r => ({
                     date: (() => {
                         const v = r.c[1]?.v;
@@ -1038,6 +1382,7 @@
                     type: String(r.c[2]?.v || "").trim(),
                     amount: Number(r.c[3]?.v || 0),
                     category: String(r.c[4]?.v || "Other").trim(),
+                    note: String(r.c[6]?.v ?? "").trim(),
                     paymentMethod: String(r.c[paymentMethodColumn]?.v ?? "").trim()
                 })).sort((a, b) => a.date - b.date);
 
@@ -1547,7 +1892,7 @@
         }
 
         function clearTransactionFilters() {
-            const ids = ['categoryFilter','typeFilter','dateFrom','dateTo'];
+            const ids = ['categoryFilter', 'typeFilter', 'dateFrom', 'dateTo'];
             ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
             applyTransactionFilters();
         }
@@ -1569,6 +1914,7 @@
             <td class="${item.type === 'Income' ? 'amount-inc' : 'amount-exp'}">
                 ${item.type === 'Income' ? '+' : '-'} ₹${formatCurrency(item.amount)}
             </td>
+            <td class="note-column"><span class="note-text" title="${escapeHtml(item.note || "—")}">${escapeHtml(item.note || "—")}</span></td>
         </tr>
     `).join('');
 
@@ -1596,7 +1942,7 @@
 
             const page = document.createElement('p');
             page.className = 'page-indicator';
-            page.innerText="Page";
+            page.innerText = "Page";
 
             const pageText = document.createElement('div');
             pageText.className = 'page-indicator';
@@ -1892,6 +2238,27 @@
             `;
 
             return { tableHTML, data: summaryArray };
+        }
+
+        // Footer switch controls the complete Note column. Notes are hidden by default.
+        const showNotesToggle = document.getElementById("showNotesToggle");
+        const transactionTable = document.getElementById("transactionTable");
+        const noteToggleStatus = document.getElementById("noteToggleStatus");
+
+        if (showNotesToggle && transactionTable) {
+            const syncNotesVisibility = () => {
+                const showNotes = showNotesToggle.checked;
+                transactionTable.classList.toggle("hide-notes", !showNotes);
+                showNotesToggle.setAttribute("aria-checked", String(showNotes));
+                if (noteToggleStatus) noteToggleStatus.textContent = showNotes ? "ON" : "OFF";
+                const toggleLabel = showNotesToggle.closest(".footer-note-toggle");
+                if (toggleLabel) toggleLabel.classList.toggle("is-on", showNotes);
+            };
+
+            // Enforce the default OFF state on every page load.
+            showNotesToggle.checked = false;
+            syncNotesVisibility();
+            showNotesToggle.addEventListener("change", syncNotesVisibility);
         }
 
         // Rows-per-page selector handler and filter buttons wiring
